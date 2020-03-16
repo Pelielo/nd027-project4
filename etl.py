@@ -154,7 +154,7 @@ def process_log_data(spark, input_data_path, output_data_path):
     songplays_table.printSchema()
 
     # write songplays table to parquet files partitioned by year and month
-    songplays_table.write.parquet(output_data_path + 'songplays.parquet')
+    songplays_table.write.partitionBy("year", "month").parquet(output_data_path + 'songplays.parquet')
 
 
 def main():
