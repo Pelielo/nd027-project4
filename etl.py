@@ -22,6 +22,10 @@ def create_spark_session():
 
 
 def process_song_data(spark, input_data_path, output_data_path):
+    """Processes song data in .json format reading from 
+    input_data_path using the spark session and outputs 
+    artists.parquet and song.parquet to output_data_path"""
+
     # get path to song data files
     song_data_path = 'song_data/*/*/*/*.json'
 
@@ -62,6 +66,11 @@ def process_song_data(spark, input_data_path, output_data_path):
 
 
 def process_log_data(spark, input_data_path, output_data_path):
+    """Processes log data in .json format reading from 
+    input_data_path using the spark session and outputs 
+    users.parquet, time.parquet and songplays.parquet 
+    to output_data_path"""
+
     # get path to log data files
     log_data_path = "log_data/*.json"
     
