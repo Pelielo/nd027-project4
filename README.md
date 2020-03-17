@@ -20,3 +20,18 @@ SECRET_ACCESS_KEY=
 ## Executing ETL process
 
 The `etl.py` script uses `pyspark` to read log and song data from a S3 bucket, process them into a star schema organized as the tables `time`, `artists`, `songs`, `users` and `songplays`. The resulting datasets are then written in `.parquet` files and uploaded to a S3 bucket.
+
+The output files are partitioned using the following rules:
+* `songplays.parquet` is partitioned by `year` and `month`.
+* `songs.parquet` is partitioned by `year` and `artist_id`.
+* `time.parquet` is partitioned by `year` and `month`.
+
+
+
+## Data Model
+
+The data model chosen to represent the data processed by the ETL is the following:
+
+![Star Schema](./sparkify_star_schema.png)
+
+
