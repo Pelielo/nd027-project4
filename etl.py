@@ -45,7 +45,7 @@ def process_song_data(spark, input_data_path, output_data_path):
     df.show(5)
 
     # extract columns to create songs table
-    songs_table = df.selectExpr('song_id', 'title', 'artist_id', 'year', 'duration')
+    songs_table = df.selectExpr('song_id', 'title', 'artist_id', 'year', 'duration').dropDuplicates()
     songs_table.show(5)
     songs_table.printSchema()
     
@@ -53,7 +53,7 @@ def process_song_data(spark, input_data_path, output_data_path):
     songs_table.write.partitionBy("year", "artist_id").parquet(output_data_path + 'songs.parquet')
 
     # extract columns to create artists table
-    artists_table = df.selectExpr('artist_id', 'artist_name as name', 'artist_location as location', 'artist_latitude as latitude', 'artist_longitude as longitude')
+    artists_table = df.selectExpr('artist_id', 'artist_name as name', 'artist_location as location', 'artist_latitude as latitude', 'artist_longitude as longitude').dropDuplicates()
     artists_table.show(5)
     artists_table.printSchema()
     
@@ -99,7 +99,7 @@ def process_log_data(spark, input_data_path, output_data_path):
     df = df.where(df.page == 'NextSong')
 
     # extract columns for users table    
-    users_table = df.selectExpr('cast(userId as int) as user_id', 'firstName as first_name', 'lastName as last_name', 'gender', 'level')
+    users_table = df.selectExpr('cast(userId as int) as user_id', 'firstName as first_name', 'lastName as last_name', 'gender', 'level').dropDuplicates()
     users_table.show(5)
     users_table.printSchema()
     
@@ -118,7 +118,7 @@ def process_log_data(spark, input_data_path, output_data_path):
             year(a.ts) as year,
             dayofweek(a.ts) as weekday
         from (select cast(ts/1000 as timestamp) as ts from log_table) a
-    """)
+    """).dropDuplicates()
     
     # write time table to parquet files partitioned by year and month
     time_table.write.partitionBy("year", "month").parquet(output_data_path + 'time.parquet')
@@ -139,8 +139,10 @@ def process_log_data(spark, input_data_path, output_data_path):
     # extract columns from joined song and log datasets to create songplays table 
     joined_df.createOrReplaceTempView('joined_table')
     songplays_table = spark.sql("""
-        select distinct
+        select
             cast(ts/1000 as timestamp) as start_time,
+            year(cast(ts/1000 as timestamp)) as year,
+            month(cast(ts/1000 as timestamp)) as month,
             cast(userId as int) as user_id,
             level,
             song_id,
@@ -149,7 +151,7 @@ def process_log_data(spark, input_data_path, output_data_path):
             location,
             userAgent as user_agent
         from joined_table  
-    """)
+    """).dropDuplicates()
     songplays_table.show(5)
     songplays_table.printSchema()
 
